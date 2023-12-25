@@ -1,4 +1,4 @@
-#Backspace
+﻿#Backspace
 #Backspace
 from binaryninja import *
 import pprint
@@ -222,8 +222,10 @@ def resolve_cfg_link(bv, mlil, il, backbone):
         false_state = get_ssa_def(mlil, f_def).src.possible_values.value
         true_state  = get_ssa_def(mlil, t_def).src.possible_values.value
 
+        # 获得两个分支对应的StateVar的值
         logger.log_info(f'false_state : {false_state:#x} true_state:{true_state:#x}')
 
+        # 有时候我发现有些StateVar值没有对应的真实块，直接把这个值先Patch成0，脚本会自动重新链接到主分发块
         return CFGLink(bb, backbone[true_state], backbone[false_state], il)
 
 def clean_block(bv, mlil, link):
@@ -345,7 +347,8 @@ logger.log_info('[ollvm]ollvm 的调度状态变量 -> ' + state_var.name)
 
 backbone = compute_backbone_map(bv,mlil,state_var)
 logger.log_info('提取到的StateVar与真实块的map')
-logger.log_info(backbone)
+for key in backbone:
+    logger.log_info(f'State {key:#x} Block {backbone[key]}')
 
 original = compute_original_blocks(bv, mlil, state_var)
 logger.log_info('提取到的StateVar赋值的块')
